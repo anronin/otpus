@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141418" media="(prefers-color-scheme: dark)">
+<title>Otpus · TOTP code generator</title>
+<meta name="description" content="Generate TOTP one-time codes from a base32 secret, locally. Nothing leaves your machine.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2032%2032%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22a%22%20gradientUnits=%22userSpaceOnUse%22%20x1=%2216%22%20y1=%221.5%22%20x2=%2216%22%20y2=%2229%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%236e4ff6%22/%3E%3Cstop%20offset=%22.55%22%20stop-color=%22%23a64bd8%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23e0455a%22/%3E%3C/linearGradient%3E%3CradialGradient%20id=%22b%22%20cx=%2216%22%20cy=%2224%22%20r=%2212%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%232a0a1a%22%20stop-opacity=%22.55%22/%3E%3Cstop%20offset=%22.55%22%20stop-color=%22%232a0a1a%22%20stop-opacity=%22.2%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%232a0a1a%22%20stop-opacity=%220%22/%3E%3C/radialGradient%3E%3C/defs%3E%3Cg%20fill=%22none%22%20stroke=%22url(%23a)%22%20stroke-width=%223.6%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M10.5%2022.5C7%2023.5%204.5%2022.5%202.8%2019.6%22/%3E%3Cpath%20d=%22M21.5%2022.5C25%2023.5%2027.5%2022.5%2029.2%2019.6%22/%3E%3Cpath%20d=%22M14%2024C11%2027.5%207%2028%205%2025.8C4.3%2025%204.5%2024%205.2%2023.6%22/%3E%3Cpath%20d=%22M18%2024C21%2027.5%2025%2028%2027%2025.8C27.7%2025%2027.5%2024%2026.8%2023.6%22/%3E%3C/g%3E%3Cg%20fill=%22none%22%20stroke=%22%232a0a1a%22%20stroke-opacity=%22.22%22%20stroke-width=%223.6%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M10.5%2022.5C7%2023.5%204.5%2022.5%202.8%2019.6%22/%3E%3Cpath%20d=%22M21.5%2022.5C25%2023.5%2027.5%2022.5%2029.2%2019.6%22/%3E%3Cpath%20d=%22M14%2024C11%2027.5%207%2028%205%2025.8C4.3%2025%204.5%2024%205.2%2023.6%22/%3E%3Cpath%20d=%22M18%2024C21%2027.5%2025%2028%2027%2025.8C27.7%2025%2027.5%2024%2026.8%2023.6%22/%3E%3C/g%3E%3Cg%20fill=%22none%22%20stroke=%22url(%23b)%22%20stroke-width=%223.6%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M10.5%2022.5C7%2023.5%204.5%2022.5%202.8%2019.6%22/%3E%3Cpath%20d=%22M21.5%2022.5C25%2023.5%2027.5%2022.5%2029.2%2019.6%22/%3E%3Cpath%20d=%22M14%2024C11%2027.5%207%2028%205%2025.8C4.3%2025%204.5%2024%205.2%2023.6%22/%3E%3Cpath%20d=%22M18%2024C21%2027.5%2025%2028%2027%2025.8C27.7%2025%2027.5%2024%2026.8%2023.6%22/%3E%3C/g%3E%3Cellipse%20cx=%2216%22%20cy=%2212.9%22%20rx=%2210%22%20ry=%2211.3%22%20fill=%22url(%23a)%22/%3E%3Cg%20fill=%22%23000%22%20fill-opacity=%22.16%22%3E%3Ccircle%20cx=%2211%22%20cy=%227%22%20r=%221.2%22/%3E%3Ccircle%20cx=%2220.6%22%20cy=%225.6%22%20r=%221.4%22/%3E%3Ccircle%20cx=%2223.4%22%20cy=%2210.4%22%20r=%221%22/%3E%3Ccircle%20cx=%228.6%22%20cy=%2212%22%20r=%22.9%22/%3E%3Ccircle%20cx=%2216.6%22%20cy=%229.6%22%20r=%22.8%22/%3E%3C/g%3E%3Cellipse%20cx=%2213%22%20cy=%225.4%22%20rx=%223.6%22%20ry=%222.1%22%20fill=%22%23fff%22%20fill-opacity=%22.3%22%20transform=%22rotate(-20%2013%205.4)%22/%3E%3Cellipse%20cx=%2213%22%20cy=%2217.2%22%20rx=%223%22%20ry=%223.2%22%20fill=%22%23fff%22%20fill-opacity=%22.22%22/%3E%3Cellipse%20cx=%2219.2%22%20cy=%2217.2%22%20rx=%223%22%20ry=%223.2%22%20fill=%22%23fff%22%20fill-opacity=%22.22%22/%3E%3Cellipse%20cx=%2212.9%22%20cy=%2217.5%22%20rx=%221.35%22%20ry=%222%22%20fill=%22%231b1b1f%22/%3E%3Cellipse%20cx=%2219%22%20cy=%2217.5%22%20rx=%221.35%22%20ry=%222%22%20fill=%22%231b1b1f%22/%3E%3Ccircle%20cx=%2213.3%22%20cy=%2216.6%22%20r=%22.45%22%20fill=%22%23fff%22/%3E%3Ccircle%20cx=%2219.4%22%20cy=%2216.6%22%20r=%22.45%22%20fill=%22%23fff%22/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f6f5f1; --card: #ffffff; --ink: #1b1b1f; --muted: #6b6b73;
+    --line: #dcdbd5; --accent: #6e4ff6; --accent-ink: #ffffff; --danger: #c0392b;
+    --track: #e6e4dd; --field-line: #93938f;
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6b73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141418; --card: #1e1e24; --ink: #ecebf5; --muted: #9b9aa8;
+      --line: #2e2e38; --accent: #9d86ff; --accent-ink: #141418; --danger: #ff7b6b;
+      --track: #2a2a33; --field-line: #6b6a74;
+      --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b9aa8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; justify-items: center; align-items: start;
+    background: var(--bg); color: var(--ink);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  /* Top-anchored, not centered: opening settings must not shift the fields above them. */
+  main { width: min(440px, calc(100vw - 32px)); padding: max(32px, 12vh) 0 32px; }
+  h1 { position: relative; margin: 0 0 4px; font-size: 28px; letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  h1 span.hiding { color: transparent; }
+  .title-overlay { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+  .sub { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; container-type: inline-size; }
+  button { -webkit-tap-highlight-color: transparent; }
+  label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+  input, select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--field-line); border-radius: 10px;
+    background: var(--bg); color: var(--ink); font: inherit;
+  }
+  select {
+    appearance: none; -webkit-appearance: none; padding-right: 36px;
+    background-image: var(--chevron); background-repeat: no-repeat;
+    background-position: right 12px center; background-size: 16px;
+  }
+  [aria-invalid="true"] { border-color: var(--danger); }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  [aria-invalid="true"]:focus { outline-color: var(--danger); }
+  #secret { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
+  .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 11px; }
+  @container (max-width: 340px) {
+    .row { grid-template-columns: 1fr 1fr; }
+    .row > :last-child { grid-column: 1 / -1; }
+  }
+  .toggle { margin-top: 14px; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; user-select: none; }
+  /* Animating grid rows from 0fr to 1fr slides to the content's real height. */
+  .collapse {
+    display: grid; grid-template-rows: 0fr; opacity: 0;
+    transition: grid-template-rows .25s ease, opacity .2s ease;
+  }
+  .collapse.open { grid-template-rows: 1fr; opacity: 1; }
+  .collapse > div { overflow: hidden; padding: 3px; margin: -3px; }
+  @media (prefers-reduced-motion: reduce) { .collapse { transition: none; } }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+    border: 1px solid var(--line); border-radius: 999px;
+    color: var(--muted); font-size: 13px; transition: color .15s, border-color .15s;
+  }
+  .chip svg { width: 14px; height: 14px; }
+  .toggle[aria-expanded="true"] .chip { color: var(--ink); border-color: var(--muted); }
+  @media (hover: hover) { .toggle:hover .chip { color: var(--ink); border-color: var(--muted); } }
+  /* Bigger tap target on touch screens. */
+  @media (pointer: coarse) { .chip { padding: 8px 14px; font-size: 14px; } }
+  .toggle:focus-visible { outline: none; }
+  .toggle:focus-visible .chip { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .code-wrap { margin-top: 22px; }
+  #code {
+    font: 600 48px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em;
+    font-size: min(48px, calc(100cqi / (var(--len, 6) * 0.75)));
+    white-space: nowrap;
+    background: none; border: 0; color: var(--ink); padding: 0; cursor: pointer; text-align: left;
+    min-height: 48px;
+  }
+  @media (hover: hover) { #code:hover { color: var(--accent); } }
+  #code:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+  #code.empty { color: var(--muted); letter-spacing: 0; font-size: 18px; font-weight: 400; cursor: default; }
+  /* Hidden, not removed, while there is no code, so entering a secret doesn't shift the layout. */
+  .countdown { display: flex; align-items: center; gap: 10px; height: 18px; margin-top: 14px; visibility: hidden; }
+  .countdown.live { visibility: visible; }
+  .track { flex: 1; height: 3px; border-radius: 2px; background: var(--track); overflow: hidden; }
+  .bar { height: 100%; background: var(--accent); border-radius: 2px; transform-origin: left; }
+  #remaining { min-width: 28px; text-align: right; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .countdown.urgent .bar { background: var(--danger); }
+  .countdown.urgent #remaining { color: var(--danger); }
+  .hint { margin: 10px 0 0; min-height: 20px; font-size: 13px; color: var(--muted); }
+  .hint.error { color: var(--danger); }
+  .field { position: relative; }
+  .field-icon {
+    display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    width: 20px; height: 20px; color: var(--danger); pointer-events: none;
+  }
+  #secret[aria-invalid="true"] { padding-right: 42px; }
+  #secret[aria-invalid="true"] ~ .field-icon { display: block; }
+  .popup {
+    display: none; position: absolute; right: 0; top: calc(100% + 8px); z-index: 1;
+    padding: 8px 12px; border: 1px solid var(--danger); border-radius: 10px;
+    background: var(--card); color: var(--danger); font-size: 13px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / .08);
+  }
+  .popup::before {
+    content: ""; position: absolute; right: 16px; top: -6px; width: 10px; height: 10px;
+    background: var(--card); border-left: 1px solid var(--danger); border-top: 1px solid var(--danger);
+    transform: rotate(45deg);
+  }
+  #secret[aria-invalid="true"]:focus ~ .popup { display: block; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  @media (forced-colors: active) {
+    .track { forced-color-adjust: none; background: GrayText; }
+    .bar, .countdown.urgent .bar { forced-color-adjust: none; background: Highlight; }
+  }
+  footer { margin-top: 20px; text-align: center; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">Otp<span id="title-us">us</span></h1>
+  <p class="sub">Paste a base32 secret, get the current one-time code. Nothing leaves this machine.</p>
+
+  <div class="card">
+    <label for="secret">Secret key</label>
+    <div class="field">
+      <input id="secret" type="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" autofocus placeholder="JBSW Y3DP EHPK 3PXP" aria-describedby="secret-error">
+      <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h0"/></svg>
+      <div class="popup" id="secret-error"></div>
+    </div>
+
+    <button type="button" class="toggle" id="toggle" aria-expanded="false" aria-controls="advanced" title="Digits, period, algorithm"><span class="chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+        <span id="settings"></span>
+      </span></button>
+    <div class="collapse" id="advanced" inert><div>
+      <div class="row">
+        <div><label for="digits">Digits</label><input id="digits" type="number" inputmode="numeric" min="4" max="10" value="6" aria-describedby="hint"></div>
+        <div><label for="period">Period (s)</label><input id="period" type="number" inputmode="numeric" min="1" max="300" value="30" aria-describedby="hint"></div>
+        <div><label for="algorithm">Algorithm</label>
+          <select id="algorithm" aria-describedby="hint"><option>SHA1</option><option>SHA256</option><option>SHA512</option></select></div>
+      </div>
+    </div></div>
+
+    <div class="code-wrap">
+      <button id="code" class="empty" title="Copy" disabled></button>
+      <div class="countdown" id="countdown">
+        <div class="track"><div class="bar" id="bar"></div></div>
+        <span id="remaining"></span>
+      </div>
+    </div>
+    <p class="hint" id="hint" role="status"></p>
+    <span class="sr-only" id="announce" aria-live="polite"></span>
+  </div>
+
+  <footer>RFC 6238 · runs locally</footer>
+</main>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const secret = $('secret'), digits = $('digits'), period = $('period'), algorithm = $('algorithm');
+  const settings = $('settings'), toggle = $('toggle'), advanced = $('advanced');
+  const codeEl = $('code'), countdown = $('countdown'), bar = $('bar'), remainingEl = $('remaining'), hint = $('hint');
+  const announce = $('announce'), secretError = $('secret-error');
+  const fields = { secret, digits, period, algorithm };
+
+  // A secret in the URL fragment (#SECRET) never reaches the server, so it is
+  // a safe way to bookmark one. We only write it back when the user typed one.
+  if (location.hash.length > 1) secret.value = decodeURIComponent(location.hash.slice(1));
+
+  let lastCode = '', livePeriod = null, lastCounter = null, latestRequest = 0;
+  let quietUntil = 0, pauseTimer = null, rejected = false;
+  const PAUSE_MS = 700;
+
+  const spaced = (code) => code.split('').join(' ');
+
+  const setHint = (text, className) => {
+    if (hint.textContent !== text) hint.textContent = text;
+    hint.className = 'hint' + (className ? ' ' + className : '');
+  };
+
+  const markInvalid = (field, message) => {
+    Object.values(fields).forEach((el) => {
+      if (el === field) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+    });
+    const secretMessage = field === secret ? message : '';
+    if (secretError.textContent !== secretMessage) secretError.textContent = secretMessage;
+    if (secretMessage && announce.textContent !== secretMessage) announce.textContent = secretMessage;
+  };
+
+  const clearCode = (text, label) => {
+    codeEl.textContent = text;
+    codeEl.classList.add('empty'); codeEl.disabled = true; lastCode = '';
+    if (label) codeEl.setAttribute('aria-label', label); else codeEl.removeAttribute('aria-label');
+    livePeriod = null; countdown.classList.remove('live');
+  };
+
+  const showWaiting = () => {
+    clearCode('Waiting for a secret…');
+    setHint('', '');
+    markInvalid(null, '');
+  };
+
+  const showError = (message, fieldName) => {
+    clearCode('– – – – – –', 'No code');
+    const field = fields[fieldName] || null;
+    const typing = field === secret && Date.now() < quietUntil;
+    const inline = field === secret;
+    setHint(inline ? '' : message, inline ? '' : 'error');
+    markInvalid(typing ? null : field, message);
+  };
+
+  const render = ({ code, period }) => {
+    if (code !== lastCode) announce.textContent = `New code ${spaced(code)}`;
+    codeEl.textContent = code; codeEl.classList.remove('empty'); codeEl.disabled = false; lastCode = code;
+    codeEl.setAttribute('aria-label', `Copy code ${spaced(code)}`);
+    codeEl.style.setProperty('--len', code.length);
+    livePeriod = period; countdown.classList.add('live');
+    markInvalid(null, '');
+    if (!hint.classList.contains('copied')) setHint('', '');
+  };
+
+  const query = () => new URLSearchParams({ secret: secret.value.trim(), digits: digits.value, period: period.value, algorithm: algorithm.value }).toString();
+  const counterFor = (p) => Math.floor(Date.now() / 1000 / p);
+
+  const restoreLastCode = () => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('otpus:last'));
+      if (saved && saved.query === query() && saved.counter === counterFor(saved.period)) render(saved);
+    } catch (e) {}
+  };
+
+  addEventListener('pagehide', () => {
+    try {
+      if (lastCode && livePeriod) {
+        sessionStorage.setItem('otpus:last', JSON.stringify({ query: query(), counter: counterFor(livePeriod), code: lastCode, period: livePeriod }));
+      }
+    } catch (e) {}
+  });
+
+  const tick = async () => {
+    const s = secret.value.trim();
+    if (!s) { latestRequest++; showWaiting(); return; }
+    const q = query();
+    // Requests can overlap (poll, typing, period rollover). Only the newest one may update the page,
+    // otherwise a slow answer from just before a rollover could bring back the old code.
+    const request = ++latestRequest;
+    try {
+      const res = await fetch('/code?' + q);
+      const body = await res.json();
+      if (request !== latestRequest) return;
+      rejected = !res.ok;
+      if (res.ok) render(body); else showError(body.error, body.field);
+    } catch (e) {
+      if (request !== latestRequest) return;
+      rejected = false;
+      showError('Server unreachable. Is `mix run --no-halt` still running?', null);
+    }
+  };
+
+  const copy = async () => {
+    if (!lastCode) return;
+    try { await navigator.clipboard.writeText(lastCode); } catch (e) { return; }
+    setHint('Copied', 'copied');
+    setTimeout(() => { hint.classList.remove('copied'); hint.textContent = ''; }, 1200);
+  };
+
+  secret.addEventListener('input', () => {
+    history.replaceState(null, '', secret.value.trim() ? '#' + encodeURIComponent(secret.value.trim()) : location.pathname);
+    quietUntil = Date.now() + PAUSE_MS;
+    clearTimeout(pauseTimer);
+    pauseTimer = setTimeout(tick, PAUSE_MS);
+    tick();
+  });
+  secret.addEventListener('blur', () => {
+    quietUntil = 0;
+    tick();
+  });
+  const showSettings = () => {
+    settings.textContent = `${digits.value} digits · ${period.value}s · ${algorithm.value}`;
+    toggle.setAttribute('aria-label', `Settings: ${digits.value} digits, ${period.value} seconds, ${algorithm.value}`);
+  };
+  [digits, period, algorithm].forEach((el) => el.addEventListener('input', () => { showSettings(); tick(); }));
+  codeEl.addEventListener('click', copy);
+
+  const setOpen = (open) => {
+    toggle.setAttribute('aria-expanded', open);
+    advanced.classList.toggle('open', open);
+    advanced.inert = !open;
+  };
+
+  toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+
+  [toggle, advanced].forEach((el) => el.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || toggle.getAttribute('aria-expanded') !== 'true') return;
+    setOpen(false);
+    toggle.focus();
+  }));
+
+  // The line runs on the browser clock every frame so it drains smoothly.
+  // When a period ends, fetch the new code right away instead of waiting for the poll.
+  const frame = () => {
+    if (livePeriod) {
+      const now = Date.now() / 1000;
+      const left = livePeriod - (now % livePeriod);
+      const secs = Math.ceil(left);
+      bar.style.transform = `scaleX(${left / livePeriod})`;
+      remainingEl.textContent = secs + 's';
+      countdown.classList.toggle('urgent', secs <= 5);
+      const counter = Math.floor(now / livePeriod);
+      if (lastCounter !== null && counter !== lastCounter) tick();
+      lastCounter = counter;
+    }
+    requestAnimationFrame(frame);
+  };
+
+  showSettings();
+  if (secret.value.trim()) restoreLastCode();
+  tick();
+  setInterval(() => { if (!rejected) tick(); }, 1000);
+  requestAnimationFrame(frame);
+
+  const animateTitle = () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const title = $('title'), us = $('title-us'), NS = 'http://www.w3.org/2000/svg';
+    const SPINES = {
+      u1: [[.17, 0], ['L', .17, .6], ['C', .17, .86, .32, .95, .5, .95], ['C', .62, .95, .74, .9, .8, .8]],
+      u2: [[.83, 0], ['L', .83, 1]],
+      s1: [[.82, .16], ['C', .72, .02, .48, 0, .33, .04], ['C', .12, .1, .1, .38, .32, .46], ['L', .5, .51]],
+      s2: [[.5, .51], ['L', .68, .56], ['C', .92, .63, .9, .94, .62, .98], ['C', .42, 1.01, .2, .96, .12, .82]]
+    };
+    const ARMS = [
+      { r: [-5.5, 9.6], c1: [-9, 10.6], c2: [-11.5, 9.6], t: [-13.2, 6.7], spine: 'u1', letter: 0 },
+      { r: [-2, 11.1], c1: [-5, 14.6], c2: [-12.5, 15.5], t: [-10.8, 10.7], spine: 'u2', letter: 0 },
+      { r: [2, 11.1], c1: [5, 14.6], c2: [12.5, 15.5], t: [10.8, 10.7], spine: 's2', letter: 1 },
+      { r: [5.5, 9.6], c1: [9, 10.6], c2: [11.5, 9.6], t: [13.2, 6.7], spine: 's1', letter: 1 }
+    ];
+    const STOPS = [['0', '#6e4ff6'], ['.55', '#a64bd8'], ['1', '#e0455a']];
+
+    const node = (tag, attrs, parent) => {
+      const n = document.createElementNS(NS, tag);
+      Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+      if (parent) parent.appendChild(n);
+      return n;
+    };
+    const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    const ease = (t) => (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+    const cs = getComputedStyle(us), finalColor = cs.color;
+    const tr = title.getBoundingClientRect();
+    const marker = document.createElement('span');
+    marker.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+    us.appendChild(marker);
+    const BASE = marker.getBoundingClientRect().bottom - tr.top;
+    marker.remove();
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const XH = ctx.measureText('x').actualBoundingBoxAscent, TOP = BASE - XH;
+    const glyphs = [0, 1].map((i) => {
+      const range = document.createRange();
+      range.setStart(us.firstChild, i);
+      range.setEnd(us.firstChild, i + 1);
+      const r = range.getBoundingClientRect();
+      return { x: r.left - tr.left, w: r.width };
+    });
+    if (!(XH > 0) || !tr.width) return;
+
+    const anims = [], timers = [];
+    let raf = 0;
+    const svg = node('svg', { class: 'title-overlay', width: tr.width, height: tr.height, viewBox: `0 0 ${tr.width} ${tr.height}`, 'aria-hidden': 'true' });
+    const finish = () => {
+      removeEventListener('resize', finish);
+      cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+      anims.forEach((a) => a.cancel());
+      us.classList.remove('hiding');
+      svg.remove();
+    };
+
+    const defs = node('defs', {}, svg);
+    const gradient = (id, y1, y2) => {
+      const g = node('linearGradient', { id, gradientUnits: 'userSpaceOnUse', x1: 0, y1, x2: 0, y2 }, defs);
+      STOPS.forEach(([offset, color]) => node('stop', { offset, 'stop-color': color }, g));
+    };
+    gradient('ta-body', TOP - 40, BASE + 4);
+    gradient('ta-fill', TOP, BASE);
+    const area = { maskUnits: 'userSpaceOnUse', x: -100, y: -200, width: tr.width + 200, height: tr.height + 300 };
+    const reveal = node('g', { fill: 'none', stroke: '#fff', 'stroke-width': (XH * .43).toFixed(1), 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, node('mask', { id: 'ta-reveal', ...area }, defs));
+    const pour = node('rect', { x: 0, y: TOP - 1, width: tr.width, height: XH + 3, fill: '#fff' }, node('mask', { id: 'ta-pour', ...area }, defs));
+    pour.style.cssText = 'transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0)';
+    node('rect', { x: -100, y: -200, width: tr.width + 200, height: TOP + 201.2 }, node('clipPath', { id: 'ta-above', clipPathUnits: 'userSpaceOnUse' }, defs));
+
+    const font = { x: glyphs.map((g) => g.x.toFixed(2)).join(' '), y: BASE, 'font-family': cs.fontFamily, 'font-size': cs.fontSize, 'font-weight': cs.fontWeight };
+    const letters = node('g', {}, svg);
+    const text = (attrs) => { const t = node('text', { ...font, ...attrs }, letters); t.textContent = 'us'; return t; };
+    text({ fill: 'url(#ta-fill)', mask: 'url(#ta-pour)' });
+    const solid = text({ fill: finalColor, opacity: 0 });
+    const outline = text({ fill: 'none', stroke: 'url(#ta-body)', 'stroke-width': 2.2, 'stroke-linejoin': 'round', mask: 'url(#ta-reveal)' });
+
+    const body = node('g', {}, svg), clipper = node('g', {}, body), sinker = node('g', {}, clipper);
+    const links = node('g', { fill: 'none', stroke: 'url(#ta-body)', 'stroke-linecap': 'round' }, sinker);
+    const head = node('g', {}, sinker);
+
+    title.appendChild(svg);
+    us.classList.add('hiding');
+    addEventListener('resize', finish);
+
+    const boxes = glyphs.map((g) => ({ x: g.x + g.w * .03, w: g.w * .93 }));
+    const sc = XH / 23.3, cx = (boxes[0].x + boxes[1].x + boxes[1].w) / 2, cy = TOP - 12 * sc;
+    const h = node('g', { transform: `translate(${cx} ${cy}) scale(${sc})` }, head);
+    node('ellipse', { rx: 9.5, ry: 10.8, fill: 'url(#ta-body)' }, h);
+    const spots = node('g', { fill: '#000', 'fill-opacity': '.16' }, h);
+    [[-4, -6, 1.1], [4.5, -7, 1.3], [6.5, -2, .9]].forEach(([x, y, r]) => node('circle', { cx: x, cy: y, r }, spots));
+    [-2.8, 2.8].forEach((x) => {
+      node('ellipse', { cx: x, cy: 3.2, rx: 2.7, ry: 2.9, fill: '#fff', 'fill-opacity': '.22' }, h);
+      node('ellipse', { cx: x, cy: 3.5, rx: 1.2, ry: 1.8, fill: '#1b1b1f' }, h);
+    });
+
+    const spinePath = (spec, box) => {
+      const p = (x, y) => `${(box.x + x * box.w).toFixed(2)} ${(TOP + y * XH).toFixed(2)}`;
+      return spec.slice(1).reduce((d, s) => d + (s[0] === 'L' ? `L${p(s[1], s[2])}` : `C${p(s[1], s[2])} ${p(s[3], s[4])} ${p(s[5], s[6])}`), `M${p(spec[0][0], spec[0][1])}`);
+    };
+    const at = (v) => [cx + v[0] * sc, cy + v[1] * sc];
+    const arms = ARMS.map((a) => {
+      const spec = SPINES[a.spine], box = boxes[a.letter];
+      const s = [box.x + spec[0][0] * box.w, TOP + spec[0][1] * XH];
+      const from = { r: at(a.r), c1: at(a.c1), c2: at(a.c2), t: at(a.t) };
+      const to = a.spine === 's2'
+        ? { c1: [from.r[0] + 4 * sc, from.r[1] + 3 * sc], c2: [s[0] - 6 * sc, s[1] - 2 * sc], t: s }
+        : { c1: [from.r[0], from.r[1] + 4 * sc], c2: [s[0], s[1] - 5 * sc], t: [s[0], s[1] + sc] };
+      const link = node('path', {}, links);
+      const spine = node('path', { d: spinePath(spec, box) }, reveal);
+      const length = spine.getTotalLength();
+      spine.style.strokeDasharray = length;
+      spine.style.strokeDashoffset = length;
+      return { link, from, to, spine, length };
+    });
+    const bend = (arm, t) => {
+      const k = ease(t), r = arm.from.r;
+      const c1 = lerp(arm.from.c1, arm.to.c1, k), c2 = lerp(arm.from.c2, arm.to.c2, k), tip = lerp(arm.from.t, arm.to.t, k);
+      arm.link.setAttribute('d', `M${r[0]} ${r[1]}C${c1[0]} ${c1[1]} ${c2[0]} ${c2[1]} ${tip[0]} ${tip[1]}`);
+      arm.link.setAttribute('stroke-width', ((3.3 - .9 * k) * sc).toFixed(2));
+    };
+    arms.forEach((arm) => bend(arm, 0));
+
+    const play = (el, keyframes, options) => {
+      const a = el.animate(keyframes, { fill: 'forwards', easing: 'ease-in-out', ...options });
+      anims.push(a);
+      return a;
+    };
+    const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+    const drop = (y) => `translateY(${y * sc}px)`;
+
+    play(body, [{ transform: drop(-34), opacity: 0 }, { transform: drop(-20), opacity: 1, offset: .25 }, { transform: drop(2), offset: .8 }, { transform: drop(0) }], { duration: 750, easing: 'ease-in' });
+    const start = performance.now() + 120;
+    const swing = (now) => {
+      const t = Math.min(1, Math.max(0, (now - start) / 600));
+      arms.forEach((arm) => bend(arm, t));
+      if (t < 1) raf = requestAnimationFrame(swing);
+    };
+    raf = requestAnimationFrame(swing);
+    arms.forEach((a) => play(a.spine, [{ strokeDashoffset: a.length }, { strokeDashoffset: 0 }], { duration: 900, delay: 760 }));
+    arms.forEach((a) => play(a.spine, [{ strokeDashoffset: 0 }, { strokeDashoffset: a.length }], { duration: 550, delay: 1700, easing: 'ease-in' }));
+    play(pour, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 700, delay: 1700, easing: 'ease-out' });
+    later(2150, () => arms.forEach((a) => {
+      const length = a.link.getTotalLength();
+      a.link.style.strokeDasharray = `${length} ${length}`;
+      play(a.link, [{ strokeDashoffset: 0 }, { strokeDashoffset: length * .72 }], { duration: 320, easing: 'ease-in' });
+    }));
+    later(2370, () => clipper.setAttribute('clip-path', 'url(#ta-above)'));
+    play(sinker, [{ transform: drop(0) }, { transform: drop(9), offset: .4 }, { transform: drop(9), offset: .62 }, { transform: drop(30) }], { duration: 800, delay: 2380 });
+    play(solid, [{ opacity: 0 }, { opacity: 1 }], { duration: 650, delay: 2500, easing: 'ease' }).finished
+      .then(() => {
+        us.classList.remove('hiding');
+        return us.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'linear' }).finished;
+      })
+      .then(() => play(letters, [{ opacity: 1 }, { opacity: 0 }], { duration: 250, easing: 'linear' }).finished)
+      .then(finish)
+      .catch(() => {});
+  };
+
+  document.fonts.ready.then(() => requestAnimationFrame(animateTitle));
+})();
+</script>
+</body>
+</html>

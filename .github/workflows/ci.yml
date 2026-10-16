@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - elixir: "1.15"
+            otp: "24"
+            os: ubuntu-22.04
+          - elixir: "1.20"
+            otp: "29"
+            os: ubuntu-24.04
+            lint: true
+    env:
+      MIX_ENV: test
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Elixir and OTP
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+
+      - name: Cache deps and build
+        uses: actions/cache@v6
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.otp }}-
+
+      - name: Fetch dependencies
+        run: mix deps.get --check-locked
+
+      - name: Check formatting
+        if: matrix.lint
+        run: mix format --check-formatted
+
+      - name: Check for unused dependencies
+        if: matrix.lint
+        run: mix deps.unlock --check-unused
+
+      - name: Check page script syntax
+        if: matrix.lint
+        run: |
+          sed '1,/<script>/d;/<\/script>/,$d' priv/index.html > "$RUNNER_TEMP/page.js"
+          node --check "$RUNNER_TEMP/page.js"
+
+      - name: Compile
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test --warnings-as-errors
