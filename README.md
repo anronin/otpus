@@ -1,4 +1,5 @@
-# Otpus
+![Otpus](https://github.com/anronin/otpus/raw/main/assets/readme_logo.svg#gh-light-mode-only)
+![Otpus](https://github.com/anronin/otpus/raw/main/assets/readme_logo-darkmode.svg#gh-dark-mode-only)
 
 A tiny, local TOTP (RFC 6238) code generator in Elixir. Paste a base32
 secret, read the current one-time code, watch it tick down. Inspired by
